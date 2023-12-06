@@ -2,6 +2,7 @@
 """The `BaseModel` module."""
 from datetime import datetime
 from uuid import uuid4
+import models
 
 
 class BaseModel:
@@ -29,6 +30,7 @@ class BaseModel:
             self.created_at = datetime.now()
             self.id = str(uuid4())
             self.updated_at = datetime.now()
+            models.storage.new(self)
         else:
             for key, value in kwargs.items():
                 if key == "__class__":
@@ -48,8 +50,8 @@ class BaseModel:
 
             it is used when and update occurs for the instance
         """
-
         self.updated_at = datetime.now()
+        models.storage.save()
 
     def to_dict(self):
         """Create a dictionary representation of a BaseModel instance."""
