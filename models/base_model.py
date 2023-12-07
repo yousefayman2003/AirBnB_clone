@@ -61,7 +61,9 @@ class BaseModel:
         instance_dict["__class__"] = type(self).__name__
         if not isinstance(instance_dict["created_at"], str):
             new_dateformat = "%Y-%m-%dT%H:%M:%S.%f"
-            instance_dict["created_at"] = self.created_at.strftime(new_dateformat)
-            instance_dict["updated_at"] = self.updated_at.strftime(new_dateformat)
+            instance_dict["created_at"] = self.created_at.strftime(
+                new_dateformat)
+            instance_dict["updated_at"] = self.updated_at.strftime(
+                new_dateformat)
 
         return instance_dict

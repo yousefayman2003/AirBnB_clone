@@ -3,6 +3,7 @@
 from models.base_model import BaseModel
 from models.user import User
 from models import storage
+from models.engine.file_storage import FileStorage
 import json
 import cmd
 
@@ -17,7 +18,38 @@ class HBNBCommand(cmd.Cmd):
 
     # make a custom prompt
     prompt = "(hbnb) "
-    classes = {"BaseModel": BaseModel, "User": User}
+    classes = FileStorage.classes
+
+    def count(self, arg):
+        """counts the number of instances of a specific class"""
+        data = {**storage.all()}
+
+        for key, value in data.items():
+            data[key] = value.to_dict()
+
+        objects = []
+        for obj, obj_data in data.items():
+            cls_name = obj_data["__class__"]
+            if cls_name == arg:
+                objects.append(obj)
+
+        print(len(objects))
+
+    def default(self, line):
+        """Default action for cmd if command is not found"""
+        methods = {"all()": self.do_all, "count()": self.count}
+        # split input by `.`
+        args = line.split(".")
+        if len(args) == 2:
+            # get class name and method to apply
+            class_name, method = args
+
+            if class_name in self.classes and method in methods:
+                return methods[method](class_name)
+            else:
+                print("*** Unknown syntax: {}".format(line))
+        else:
+            print("*** Unknown syntax: {}".format(line))
 
     def do_create(self, arg):
         """Creates a new instance of BaseModel, saves it and prints the id."""
@@ -119,6 +151,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_EOF(self, arg):
         """EOF detected to exit from the program"""
+        print("")
         return True
 
     def is_valid(self, arg, operation):

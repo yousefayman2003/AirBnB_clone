@@ -3,6 +3,12 @@
 import json
 from models.base_model import BaseModel
 from models.user import User
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.state import State
+from models.review import Review
+
 
 class FileStorage:
     """
@@ -21,7 +27,10 @@ class FileStorage:
     """
     __file_path = "file.json"
     __objects = {}
-    classes = {"BaseModel": BaseModel, "User": User}
+    classes = {"BaseModel": BaseModel, "User": User,
+               "City": City, "Review": Review,
+               "Amenity": Amenity, "Place": Place,
+               "State": State}
 
     def all(self):
         """returns the dictionary __objects."""
