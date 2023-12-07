@@ -2,7 +2,7 @@
 """The `FileStorage` module."""
 import json
 from models.base_model import BaseModel
-
+from models.user import User
 
 class FileStorage:
     """
@@ -21,7 +21,7 @@ class FileStorage:
     """
     __file_path = "file.json"
     __objects = {}
-    classes = {"BaseModel": BaseModel}
+    classes = {"BaseModel": BaseModel, "User": User}
 
     def all(self):
         """returns the dictionary __objects."""
@@ -44,7 +44,7 @@ class FileStorage:
             objects[key] = obj.to_dict()
 
         with open(self.__file_path, "w") as f:
-            json.dump(objects, f)
+            json.dump(objects, f, indent=4)
 
     def reload(self):
         """
