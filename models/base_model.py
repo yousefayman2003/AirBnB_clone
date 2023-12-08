@@ -30,11 +30,13 @@ class BaseModel:
         """Create a new instance of BaseModel and define its attributes."""
 
         if not kwargs:
-            self.created_at = datetime.now()
             self.id = str(uuid4())
+            self.created_at = datetime.now()
             self.updated_at = datetime.now()
             models.storage.new(self)
         else:
+            if kwargs.get("__class__"):
+                del kwargs["__class__"]
             self.__dict__.update(kwargs)
             date_format = "%Y-%m-%dT%H:%M:%S.%f"
             self.created_at = datetime.strptime(self.created_at, date_format)
