@@ -1,12 +1,15 @@
 #!/usr/bin/python3
-"""The `BaseModel` module."""
+"""
+The `BaseModel` module.
+"""
 from datetime import datetime
 from uuid import uuid4
 import models
 
 
 class BaseModel:
-    """Class that defines all common attributes/methods for other classes
+    """
+    Class that defines all common attributes/methods for other classes.
 
     A parent class to take care of the initialization, serialization
     and deserialization of the future instances.
@@ -24,7 +27,7 @@ class BaseModel:
     """
 
     def __init__(self, *args, **kwargs):
-        """Create a new instance of BaseModel and define its attributs."""
+        """Create a new instance of BaseModel and define its attributes."""
 
         if not kwargs:
             self.created_at = datetime.now()
@@ -32,38 +35,25 @@ class BaseModel:
             self.updated_at = datetime.now()
             models.storage.new(self)
         else:
-            for key, value in kwargs.items():
-                if key == "__class__":
-                    continue
-                setattr(self, key, value)
+            self.__dict__.update(kwargs)
             date_format = "%Y-%m-%dT%H:%M:%S.%f"
             self.created_at = datetime.strptime(self.created_at, date_format)
             self.updated_at = datetime.strptime(self.updated_at, date_format)
 
     def __str__(self):
         """Return the string representation of a BaseModel instance."""
-
         return f"[{type(self).__name__}] ({self.id}) {self.__dict__}"
 
     def save(self):
-        """Update the updated_at attribute with current datetime.
-
-            it is used when and update occurs for the instance
-        """
+        """Update the updated_at attribute with the current datetime."""
         self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
         """Create a dictionary representation of a BaseModel instance."""
-
-        # Function that converts a datetime to isoformat
-        instance_dict = self.__dict__
+        instance_dict = self.__dict__.copy()
         instance_dict["__class__"] = type(self).__name__
-        if not isinstance(instance_dict["created_at"], str):
-            new_dateformat = "%Y-%m-%dT%H:%M:%S.%f"
-            instance_dict["created_at"] = self.created_at.strftime(
-                new_dateformat)
-            instance_dict["updated_at"] = self.updated_at.strftime(
-                new_dateformat)
-
+        date_format = "%Y-%m-%dT%H:%M:%S.%f"
+        instance_dict["created_at"] = self.created_at.strftime(date_format)
+        instance_dict["updated_at"] = self.updated_at.strftime(date_format)
         return instance_dict

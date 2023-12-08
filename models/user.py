@@ -1,19 +1,20 @@
 #!/usr/bin/python3
-"""The User Module.
+"""
+The User Module.
 
-    A simple module, since it has only one class called (User).
+A simple module, since it has only one class called (User).
 """
 from models.base_model import BaseModel
 
 
 class User(BaseModel):
-    """Class that define a new Airbnb user.
+    """Class that defines a new Airbnb user.
 
-        Public class attributes:
-            - email (string): empty string
-            - password (string: empty string
-            - first_name (string): empty string
-            - last_name (string): empty string
+    Public class attributes:
+        - email (string): empty string
+        - password (string): empty string
+        - first_name (string): empty string
+        - last_name (string): empty string
     """
 
     email = ""
@@ -21,5 +22,5 @@ class User(BaseModel):
     first_name = ""
     last_name = ""
 
-    def __init__(self, *arg, **kwarg):
-        super().__init__(**kwarg)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

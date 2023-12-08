@@ -1,38 +1,8 @@
 {
-    "User.cc3ceffa-ea5f-4b74-8951-1d8e787ddf3b": {
-        "created_at": "2023-12-08T05:34:28.442007",
-        "id": "cc3ceffa-ea5f-4b74-8951-1d8e787ddf3b",
-        "updated_at": "2023-12-08T05:34:28.442072",
-        "irst_nam": "Mohammed",
-        "__class__": "User"
-    },
-    "User.e9cda1eb-a0a6-4e1b-8c88-8e3523b58ab3": {
-        "created_at": "2023-12-08T05:42:06.857523",
-        "id": "e9cda1eb-a0a6-4e1b-8c88-8e3523b58ab3",
-        "updated_at": "2023-12-08T05:42:06.857599",
-        "__class__": "User"
-    },
-    "BaseModel.25570222-6f48-4e88-aa1e-0dc83e72daea": {
-        "created_at": "2023-12-08T06:16:03.207068",
-        "id": "25570222-6f48-4e88-aa1e-0dc83e72daea",
-        "updated_at": "2023-12-08T06:16:03.207130",
-        "__class__": "BaseModel"
-    },
-    "User.9083702c-0adb-4b08-8091-c28fa1e3c3e3": {
-        "created_at": "2023-12-08T06:37:09.081976",
-        "id": "9083702c-0adb-4b08-8091-c28fa1e3c3e3",
-        "updated_at": "2023-12-08T06:37:09.082034",
-        "__class__": "User"
-    },
-    "BaseModel.0a8b02a2-cf75-4c15-8e99-14ac54d0e38c": {
-        "created_at": "2023-12-08T06:37:14.244356",
-        "id": "0a8b02a2-cf75-4c15-8e99-14ac54d0e38c",
-        "updated_at": "2023-12-08T06:37:14.244442",
-        "First_Name": "MO",
-        "\"First_Name\"": "MO",
-        "\"first_name\"": "Mustafa",
-        "__class__": "BaseModel",
-        "\"Age\"": 50,
-        "\"Salary\"": 1200
+    "State.82ae0544-720f-4c19-ba2d-ddc7e4e3c3bb": {
+        "created_at": "2023-12-08T10:58:36.167643",
+        "id": "82ae0544-720f-4c19-ba2d-ddc7e4e3c3bb",
+        "updated_at": "2023-12-08T10:58:36.167711",
+        "__class__": "State"
     }
 }

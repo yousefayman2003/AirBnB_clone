@@ -12,18 +12,17 @@ from models.review import Review
 
 class FileStorage:
     """
-        Serializes instances to a JSON file and deserializes JSON file to instances.
+    Serializes objects to a JSON file and deserializes JSON file to instances.
 
-        Private class attributes:
-            __file_path (str): path to the JSON file.
-            __objects (dict): empty but will store all objects by <class name>.id.
+    Private class attributes:
+        __file_path (str): path to the JSON file.
+        __objects (dict): empty but will store all objects by <class name>.id.
 
-        Public instance methods:
-            all(self): returns the dictionary __objects.
-            new(self, obj): sets in __objects the obj with key <obj class name>.id.
-            save(self): serializes __objects to the JSON file (path: __file_path).
-            reload(self): deserializes the JSON file to __objects (only if the JSON file (__file_path) exists.
-
+    Public instance methods:
+        all(self): returns the dictionary __objects.
+        new(self, obj): sets in __objects the obj with key <obj class name>.id.
+        save(self): serializes __objects to the JSON file (path: __file_path).
+        reload(self): deserializes the JSON file (if it exists) to __objects.
     """
     __file_path = "file.json"
     __objects = {}
@@ -33,40 +32,38 @@ class FileStorage:
                "State": State}
 
     def all(self):
-        """returns the dictionary __objects."""
+        """Returns the dictionary __objects."""
         return FileStorage.__objects
 
     def new(self, obj):
         """
-            sets in __objects the obj with key <obj class name>.id.
+        Sets in __objects the obj with key <obj class name>.id.
 
-            Args:
-                obj (object): object to store.
+        Args:
+            obj (object): object to store.
         """
-        self.__objects[f"{obj.__class__.__name__ }.{obj.id}"] = obj
+        key = f"{obj.__class__.__name__}.{obj.id}"
+        self.__objects[key] = obj
 
     def save(self):
-        """serializes __objects to the JSON file."""
-        objects = {}
-
-        for key, obj in self.__objects.items():
-            objects[key] = obj.to_dict()
+        """Serializes __objects to the JSON file."""
+        objects = {key: obj.to_dict() for key, obj in self.__objects.items()}
 
         with open(self.__file_path, "w") as f:
             json.dump(objects, f, indent=4)
 
     def reload(self):
         """
-            deserializes the JSON file to __objects (only if the JSON
-            file exists), otherwise do nothing.
+        Deserializes the JSON file to __objects (only if the JSON
+        file exists), otherwise do nothing.
         """
         try:
             with open(self.__file_path, "r") as f:
-                data = json.loads(f.read())
+                data = json.load(f)
 
-                for value in data.values():
+                for key, value in data.items():
                     cls_name = value["__class__"]
                     obj = self.classes[cls_name](**value)
                     self.new(obj)
-        except:
+        except FileNotFoundError:
             pass
