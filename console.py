@@ -6,7 +6,6 @@ from models import storage
 from models.engine.file_storage import FileStorage
 import json
 import cmd
-import re
 
 
 class HBNBCommand(cmd.Cmd):
@@ -21,32 +20,28 @@ class HBNBCommand(cmd.Cmd):
     prompt = "(hbnb) "
     classes = FileStorage.classes
 
-    def parse(self, method):
+    ######################## Implemented Commands #######################
+    def do_all(self, arg):
+        """Prints all string representation of all instances.
+
+        based or not on the class name.
         """
-            parses a given input.
 
-            Args:
-                method (string): method to apply
+        if arg and arg not in self.classes:
+            print("** class doesn't exist **")
+            return
 
-            Returns: 
-                method: method name
-                argument: method arguments if any, else `empty string ("")`    
-        """
-        # get argument
-        argument = re.search("(\(.+\))", method)
-        if argument:
-            argument_index = argument.span()[0]
-            argument = method[argument_index:]
-            # remove `( ) " , { } :`
-            pattern = r'[\(\)"\{\},:]'
-            argument = re.sub(pattern, "", argument)
-            # get only method name
-            method = method[:argument_index] + "()"
-            return method, argument
-        else:
-            return method, ""
+        # retrieve data of all objects from source file
+        data = []
+        for key, value in storage.all().items():
+            if not arg:
+                data.append(str(value))
+            elif key.split(".")[0] == arg:
+                data.append(str(value))
 
-    def count(self, arg):
+        print(data)
+
+    def do_count(self, arg):
         """counts the number of instances of a specific class"""
         data = {**storage.all()}
 
@@ -61,27 +56,6 @@ class HBNBCommand(cmd.Cmd):
 
         print(len(objects))
 
-    def default(self, line):
-        """Default action for cmd if command is not found"""
-        methods = {"all()": self.do_all, "count()": self.count,
-                   "show()": self.do_show, "destroy()": self.do_destroy,
-                   "update()": self.do_update}
-
-        # split input by `.`
-        args = line.split(".")
-        if len(args) == 2:
-            # get class name and method to apply
-            class_name, method = args
-            method, argument = self.parse(method)
-            if class_name in self.classes and method in methods:
-                arg = class_name
-                if argument:
-                    arg = class_name + " " + argument
-                return methods[method](arg)
-            else:
-                print("*** Unknown syntax: {}".format(line))
-        else:
-            print("*** Unknown syntax: {}".format(line))
 
     def do_create(self, arg):
         """Creates a new instance of BaseModel, saves it and prints the id."""
@@ -90,6 +64,31 @@ class HBNBCommand(cmd.Cmd):
             new_obj = self.classes[arg]()
             new_obj.save()
             print(new_obj.id)
+
+    def do_destroy(self, arg):
+        """Deletes an instance based on the class name and id."""
+
+        if self.is_valid(arg, "destroy"):
+            # get all objects from the data source
+            req_ins = arg.replace(" ", ".")
+            all_data = storage.all()
+            ins_data = all_data.get(req_ins)
+
+            if not ins_data:
+                print("** no instance found **")
+            else:
+                del all_data[req_ins]
+                storage.__objects = all_data
+                storage.save()
+
+    def do_EOF(self, arg):
+        """EOF detected to exit from the program"""
+        print("")
+        return True
+
+    def do_quit(self, arg):
+        """Quit command to exit from the program\n"""
+        return True
 
     def do_show(self, arg):
         """Prints the string representation of an instance.
@@ -106,32 +105,6 @@ class HBNBCommand(cmd.Cmd):
                 print("** no instance found **")
             else:
                 print(ins_data)
-
-    def do_all(self, arg):
-        """Prints all string representation of all instances.
-
-        based or not on the class name.
-        """
-
-        # retrieve data of all objects from source file
-        data = {**storage.all()}
-
-        for key, value in data.items():
-            data[key] = value.to_dict()
-
-        # no filter needed
-        if not arg:
-            print(data)
-        # filter data based on a class name
-        elif arg in self.classes:
-            filtered_data = {}
-            for obj, obj_data in data.items():
-                cls_name = obj_data["__class__"]
-                if cls_name == arg:
-                    filtered_data[obj] = obj_data
-            print(filtered_data)
-        else:
-            print("** class doesn't exist **")
 
     def do_update(self, arg):
         """Updates an instance.
@@ -151,41 +124,71 @@ class HBNBCommand(cmd.Cmd):
                 print("** no instance found **")
                 return
 
-            # Cast the type of value
-            # depend on the data type of value of attr key
-            if type(req_ins.__dict__.get(attr)) is int:
-                value = int(value)
-            elif type(req_ins.__dict__.get(attr)) is float:
+            # Cast the data type of value to the appropriate one
+            if value[0] == '"':
+                value = value.replace('"', "")
+            elif "." in value:
                 value = float(value)
+            else:
+                value = int(value)
             # update the requested object and save the updated in the json file
             setattr(req_ins, attr, value)
             storage.save()
 
-    def do_destroy(self, arg):
-        """Deletes an instance based on the class name and id."""
+    ######################## Overwrite Built-in Functions #######################
+    def emptyline(self):
+        """does nothing if empty line."""
+        pass
 
-        if self.is_valid(arg, "destroy"):
-            # get all objects from the data source
-            req_ins = arg.replace(" ", ".")
-            all_data = storage.all()
-            ins_data = all_data.get(req_ins)
+    def precmd(self, line):
+        """Overwrite built-in precmd to handle a specific pattern of input.
 
-            if not ins_data:
-                print("** no instance found **")
+        handle this pattern of input "<class name>.command(<attributes>)" by
+        using the impelemented commands.
+        """
+
+        commands = ["all", "count", "show", "destroy", "update"]
+
+        # split the line to [<class name>.command, <arguments>]
+        args = line.split("(")
+
+        # parse input only if it's in the expected pattern
+        if len(args) == 2:
+            cls_name, command = args[0].split(".")
+            command_args = args[1][:-1]
+
+            if command not in commands:
+                return line
+
+            # if the requested command take attributes
+            # rather than the class name extract them
+            if len(command_args) > 0:
+                # handle update command with dictionary
+                if ", {" in command_args and command == "update":
+                    obj_id, updates = command_args.split(", {")
+                    updates = updates[:-1]
+                    updates = updates.split(", ")
+                    for i in range(len(updates)):
+                        update = updates[i]
+                        key, value = update.split(": ")
+                        query = f"{cls_name} {obj_id[1:-1]} {key[1:-1]} {value[1:-1]}"
+                        if i == len(updates) - 1:
+                            return "update " + query
+                        self.do_update(query)
+                # handle update command with attribute and its new value
+                elif ", " in command_args and command == "update":
+                    obj_id, attr, value = command_args.split(", ")
+                    query = f"update {cls_name} {obj_id[1:-1]} {attr[1:-1]} {value}"
+                    return query
+                # any other command
+                query = f"{command} {cls_name} {command_args[1:-1]}"
+                return query
             else:
-                del all_data[req_ins]
-                storage.__objects = all_data
-                storage.save()
+                return f"{command} {cls_name}"
 
-    def do_quit(self, arg):
-        """Quit command to exit from the program\n"""
-        return True
+        return line
 
-    def do_EOF(self, arg):
-        """EOF detected to exit from the program"""
-        print("")
-        return True
-
+    ######################## Helper Functions #######################
     def is_valid(self, arg, operation):
         """Create, Delete, and Display data from a data source."""
 
@@ -209,10 +212,6 @@ class HBNBCommand(cmd.Cmd):
             return False
 
         return True
-
-    def emptyline(self):
-        """does nothing if empty line."""
-        pass
 
 
 if __name__ == "__main__":
