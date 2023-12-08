@@ -6,6 +6,7 @@ from models import storage
 from models.engine.file_storage import FileStorage
 import json
 import cmd
+import re
 
 
 class HBNBCommand(cmd.Cmd):
@@ -19,6 +20,31 @@ class HBNBCommand(cmd.Cmd):
     # make a custom prompt
     prompt = "(hbnb) "
     classes = FileStorage.classes
+
+    def parse(self, method):
+        """
+            parses a given input.
+
+            Args:
+                method (string): method to apply
+
+            Returns: 
+                method: method name
+                argument: method arguments if any, else `empty string ("")`    
+        """
+        # get argument
+        argument = re.search("(\(.+\))", method)
+        if argument:
+            argument_index = argument.span()[0]
+            argument = method[argument_index:]
+            # remove `( ) " , { } :`
+            pattern = r'[\(\)"\{\},:]'
+            argument = re.sub(pattern, "", argument)
+            # get only method name
+            method = method[:argument_index] + "()"
+            return method, argument
+        else:
+            return method, ""
 
     def count(self, arg):
         """counts the number of instances of a specific class"""
@@ -37,15 +63,21 @@ class HBNBCommand(cmd.Cmd):
 
     def default(self, line):
         """Default action for cmd if command is not found"""
-        methods = {"all()": self.do_all, "count()": self.count}
+        methods = {"all()": self.do_all, "count()": self.count,
+                   "show()": self.do_show, "destroy()": self.do_destroy,
+                   "update()": self.do_update}
+
         # split input by `.`
         args = line.split(".")
         if len(args) == 2:
             # get class name and method to apply
             class_name, method = args
-
+            method, argument = self.parse(method)
             if class_name in self.classes and method in methods:
-                return methods[method](class_name)
+                arg = class_name
+                if argument:
+                    arg = class_name + " " + argument
+                return methods[method](arg)
             else:
                 print("*** Unknown syntax: {}".format(line))
         else:

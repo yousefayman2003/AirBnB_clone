@@ -50,9 +50,9 @@
         "created_at": "2023-12-07T06:44:54.189982",
         "id": "f1f4a8bf-ed7e-41cb-8294-16d5e86aa6e5",
         "updated_at": "2023-12-07T06:44:54.190069",
-        "__class__": "User",
         "first_name": "\"yousef\"",
-        "s": "\"yousef\""
+        "s": "\"yousef\"",
+        "__class__": "User"
     },
     "BaseModel.c1d0db45-5d70-4467-b1bd-b51dd429c6d1": {
         "created_at": "2023-12-07T06:44:59.012309",
@@ -80,30 +80,11 @@
         "updated_at": "2023-12-07T20:14:54.166180",
         "__class__": "User"
     },
-    "Place.6e5c2719-7dbc-44b8-aa77-a7ecf40c370d": {
-        "created_at": "2023-12-07T20:15:00.220821",
-        "id": "6e5c2719-7dbc-44b8-aa77-a7ecf40c370d",
-        "updated_at": "2023-12-07T20:15:00.220821",
-        "__class__": "Place"
-    },
     "Amenity.f8c0674d-3632-4051-bc7c-27fa6bec2565": {
         "created_at": "2023-12-07T20:15:10.672590",
         "id": "f8c0674d-3632-4051-bc7c-27fa6bec2565",
         "updated_at": "2023-12-07T20:15:10.672590",
         "__class__": "Amenity"
-    },
-    "User.17b0866b-5f44-4f11-9056-d8236de561e4": {
-        "created_at": "2023-12-07T20:21:37.442525",
-        "id": "17b0866b-5f44-4f11-9056-d8236de561e4",
-        "updated_at": "2023-12-07T20:21:37.442525",
-        "__class__": "User"
-    },
-    "User.831df39c-b422-4293-a93f-9529f69d2d9c": {
-        "created_at": "2023-12-07T20:27:06.363982",
-        "id": "831df39c-b422-4293-a93f-9529f69d2d9c",
-        "updated_at": "2023-12-07T20:27:06.363982",
-        "__class__": "User",
-        "hello": "\"123\""
     },
     "Amenity.5d1cfb2c-0770-4605-9710-59ea285ef2c5": {
         "created_at": "2023-12-07T20:29:10.309683",
@@ -115,6 +96,7 @@
         "created_at": "2023-12-07T20:29:16.129506",
         "id": "a8ad2fcf-cedc-450b-8fff-1fd636469a57",
         "updated_at": "2023-12-07T20:29:16.129506",
+        "test": "1",
         "__class__": "Place"
     }
 }
