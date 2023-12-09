@@ -61,9 +61,9 @@ class FileStorage:
             with open(self.__file_path, "r") as f:
                 data = json.load(f)
 
-                for key, value in data.items():
+                for value in data.values():
                     cls_name = value["__class__"]
                     obj = self.classes[cls_name](**value)
                     self.new(obj)
-        except FileNotFoundError:
+        except:
             pass
