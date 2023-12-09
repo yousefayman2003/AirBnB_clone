@@ -9,13 +9,8 @@ class TestBaseModel(unittest.TestCase):
     """Unit test for FileStorage Class"""
 
     def setUp(self):
+        """First code to run before any test"""
         self.storage = FileStorage()
-
-    def tearDown(self):
-        # Reset the __objects attribute
-        self.storage._FileStorage__objects = {}
-        # Reload the initial state from the file
-        self.storage.reload()
 
     def test_all(self):
         """Test all method"""
