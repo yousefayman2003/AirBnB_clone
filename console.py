@@ -15,22 +15,7 @@ class HBNBCommand(Cmd):
     Defines HBNB command interpreter.
 
     Public Class Attributes:
-        - prompt (str): command prompt.
-
-    Public Instance Methods:
-        - do_all(self, arg)
-        - do_count(self, arg)
-        - do_create(self, arg)
-        - do_destroy(self, arg)
-        - do_EOF(self, arg)
-        - do_quit(self, arg)
-        - do_show(self, arg)
-        - do_update(self, arg)
-
-        - emptyline(self)
-        - precmd(self, arg)
-
-        - is_valid(self, arg, operation)
+        prompt (str): command prompt.
     """
 
     # make a custom prompt
@@ -56,6 +41,10 @@ class HBNBCommand(Cmd):
     def do_count(self, arg):
         """Counts the number of instances of a specific class."""
         objects = []
+
+        if not arg:
+            print("** class name missing **")
+            return
 
         for obj in storage.all().values():
             if obj.to_dict()["__class__"] == arg:
@@ -86,7 +75,6 @@ class HBNBCommand(Cmd):
 
     def do_EOF(self, arg):
         """EOF detected to exit from the program"""
-        print("")
         return True
 
     def do_quit(self, arg):
@@ -107,12 +95,21 @@ class HBNBCommand(Cmd):
     def do_update(self, arg):
         """Updates an instance data based on the class name and id."""
         if self.is_valid(arg, "update"):
-            cls_name, obj_id, attr, value = arg.split()[:4]
+            args = arg.split()
+            cls_name, obj_id = args[:2]
             obj = storage.all().get(f"{cls_name}.{obj_id}")
 
             if not obj:
                 print("** no instance found **")
                 return
+            if len(args) == 2:
+                print("** attribute name missing **")
+                return False
+            elif len(args) == 3:
+                print("** value missing **")
+                return False
+
+            attr, value = args[2:4]
 
             if value[0] in ['"', "'"]:
                 value = value[1:-1]
@@ -121,6 +118,7 @@ class HBNBCommand(Cmd):
             else:
                 value = int(value)
 
+            print("updated")
             setattr(obj, attr, value)
             storage.save()
 
@@ -148,7 +146,6 @@ class HBNBCommand(Cmd):
                     cm_args = cm_args[:-1].split(", ")
                     for i, cm_arg in enumerate(cm_args):
                         key, value = cm_args[i].split(": ")
-                        obj_id = obj[1:-1]
                         query = f"{cls_name} {obj_id} {key[1:-1]} {value}"
                         if i == len(cm_args) - 1:
                             return "update " + query
@@ -179,12 +176,6 @@ class HBNBCommand(Cmd):
             return False
         elif len(args) == 1 and operation != "create":
             print("** instance id missing **")
-            return False
-        elif len(args) == 2 and operation == "update":
-            print("** attribute name missing **")
-            return False
-        elif len(args) == 3 and operation == "update":
-            print("** value missing **")
             return False
 
         return True

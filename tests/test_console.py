@@ -16,21 +16,22 @@ class TestHBNBCommand(unittest.TestCase):
     """
     Tests the functionality of HBNBCommand Class of console module.
 
-    TestCases of TestHBNBCommand:
+    TestCases:
+    ----------
         - test_help(self)
         - test_help_cm(self)
 
-        - do_all(self, arg)
-        - do_count(self, arg)
-        - do_create(self, arg)
-        - do_destroy(self, arg)
-        - do_EOF(self, arg)
-        - do_quit(self, arg)
-        - do_show(self, arg)
-        - do_update(self, arg)
+        - test_do_all(self, arg)
+        - test_do_count(self, arg)
+        - test_do_create(self, arg)
+        - test_do_destroy(self, arg)
+        - test_do_EOF(self, arg)
+        - test_do_quit(self, arg)
+        - test_do_show(self, arg)
+        - test_do_update(self, arg)
 
-        - emptyline(self)
-        - precmd(self, arg)
+        - test_emptyline(self)
+        - test_precmd(self, arg)
 
         - is_valid(self, arg, operation)
 
@@ -60,7 +61,7 @@ class TestHBNBCommand(unittest.TestCase):
         TestHBNBCommand.output_buffer.seek(0)
         TestHBNBCommand.output_buffer.truncate()
 
-    # ----------------- Test help and help <topic> ------------ #
+    # --------------- Test help, help <topic> and its errors --------------- #
 
     def test_help(self):
         """
@@ -89,6 +90,15 @@ class TestHBNBCommand(unittest.TestCase):
         for cmd in self.cmds:
             result = self.exec_cm(f"help {cmd}")
             self.assertTrue(len(result) > 25)
+
+    def test_help_errors(self):
+        """
+        Tests help command errors.
+        """
+        result = self.exec_cm(f"help test")
+        expect = "*** No help on test\n"
+
+        self.assertEqual(result, expect)
 
     # ----------------- Test output of valid commands ------------ #
 
@@ -153,7 +163,7 @@ class TestHBNBCommand(unittest.TestCase):
         Tests that the HBNBCommand handles the EOF condition.
         """
         result = self.exec_cm("EOF")
-        self.assertEqual(result, "\n")
+        self.assertEqual(result, "")
 
     def test_do_quit(self):
         """
@@ -190,9 +200,187 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertEqual(obj.Age, 21)
             self.assertEqual(obj.Salary, 2000.20)
 
-    # def test_precmd(self):
+    def test_emptyline(self):
+        """
+        Tests that HBNBComannd emptylines.
+        """
+        result = self.exec_cm("\n")
+
+        self.assertEqual(result, "")
+
+    def test_precmd(self):
+        """
+        Tests that the precmd in HBNBCommand parse input that follows a spcefic
+        pattern and pass it to onecmd method to execute it.
+        """
+        for cls in storage.classes:
+            obj_id = self.exec_cm(f"create {cls}").replace("\n", "")
+            obj_key = f"{cls}.{obj_id}"
+
+            # test <class_name>.all() pattern
+            result = self.exec_cm(HBNBCommand().precmd(f"{cls}.all()"))
+            expect = self.exec_cm(f"all {cls}")
+
+            self.assertEqual(result, expect)
+
+            # test <class_name>.show(<id>)
+            query = f"{cls}.show('{obj_id}')"
+            result = self.exec_cm(HBNBCommand().precmd(query))
+            expect = self.exec_cm(f"show {cls} {obj_id}")
+
+            self.assertEqual(result, expect)
+
+            # test <class_name>.update(<id>)
+            query = f"{cls}.update('{obj_id}', 'first', 'Mohammed')"
+            self.exec_cm(HBNBCommand().precmd(query))
+
+            query = f"{cls}.update('{obj_id}', 'last', 'Mustafa')"
+            self.exec_cm(HBNBCommand().precmd(query))
+
+            query = f"{cls}.update('{obj_id}', 'age', 21)"
+            self.exec_cm(HBNBCommand().precmd(query))
+
+            query = f"{cls}.update('{obj_id}', 'salary', 2000.20)"
+            self.exec_cm(HBNBCommand().precmd(query))
+
+            obj = storage.all().get(obj_key)
+            self.assertEqual(obj.first, "Mohammed")
+            self.assertEqual(obj.last, "Mustafa")
+            self.assertEqual(obj.age, 21)
+            self.assertEqual(obj.salary, 2000.20)
+
+            # test <class_name>.count()
+            result = self.exec_cm(HBNBCommand().precmd(f"{cls}.count()"))
+            expect = self.exec_cm(f"count {cls}")
+
+            self.assertEqual(result, expect)
+
+            # test <class_name>.destroy(<id>)
+            self.exec_cm(HBNBCommand().precmd(f"{cls}.destory('{obj_id}')"))
+            is_deleted = storage.all().get(obj_key, True)
+
+            self.assertTrue(is_deleted)
 
     # -------------- Test output of invalid Commands ------------- #
+
+    def test_do_all_errors(self):
+        """
+        Tests `all` command errors.
+        """
+        result = self.exec_cm(f"all asdjlf")
+        expect = "** class doesn't exist **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_do_count_errors(self):
+        """
+        Tests `count` command errors.
+        """
+        result = self.exec_cm("count asjdflk")
+        expect = "0\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("count")
+        expect = "** class name missing **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_do_create_errors(self):
+        """
+        Tests `create` command errors.
+        """
+        result = self.exec_cm("create asjdflk")
+        expect = "** class doesn't exist **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("create")
+        expect = "** class name missing **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_do_destroy_errors(self):
+        """
+        Tests `destroy` command errors.
+        """
+        result = self.exec_cm("create asjdflk")
+        expect = "** class doesn't exist **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("create")
+        expect = "** class name missing **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_do_show_errors(self):
+        """
+        Tests `show` command errors.
+        """
+        result = self.exec_cm("show")
+        expect = "** class name missing **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("show sadf32k")
+        expect = "** class doesn't exist **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("show BaseModel")
+        expect = "** instance id missing **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("show BaseModel 239h8hjad")
+        expect = "** no instance found **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_do_update_errors(self):
+        """
+        Tests `update` command errors.
+        """
+        result = self.exec_cm("update")
+        expect = "** class name missing **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("update sadf32k")
+        expect = "** class doesn't exist **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("update BaseModel")
+        expect = "** instance id missing **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm("update BaseModel 239h8hjad")
+        expect = "** no instance found **\n"
+
+        self.assertEqual(result, expect)
+
+        obj_id = list(storage.all().keys())[0].split(".")[1]
+        result = self.exec_cm(f"update BaseModel {obj_id}")
+        expect = "** attribute name missing **\n"
+
+        self.assertEqual(result, expect)
+
+        result = self.exec_cm(f"update BaseModel {obj_id} test")
+        expect = "** value missing **\n"
+
+        self.assertEqual(result, expect)
+
+    def test_invalid_syntax(self):
+        """
+        Tests invalid syntax error.
+        """
+        result = self.exec_cm("test")
+        expect = "*** Unknown syntax: test\n"
+
+        self.assertEqual(result, expect)
 
     # -------------- Helper Functions ----------- #
 
