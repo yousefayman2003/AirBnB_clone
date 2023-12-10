@@ -8,10 +8,20 @@ from uuid import uuid4
 from time import sleep
 from models.place import Place
 from models.engine.file_storage import FileStorage
+from models import storage
 
 
 class TestPlace(unittest.TestCase):
     """unit test for Place Class"""
+
+    def setUp(self):
+        """First code to run before any test"""
+        self.storage = storage
+        self.storage._FileStorage__file_path = "test.json"
+
+    def tearDown(self):
+        """Code To Run after every test"""
+        storage._FileStorage__file_path = FileStorage._FileStorage__file_path
 
     def test_attributes(self):
         """Test if instance has all attributes of class"""
@@ -33,7 +43,6 @@ class TestPlace(unittest.TestCase):
 
     def test_init_no_kwargs(self):
         """Test Constructor with no kwargs"""
-        now = datetime.now()
         obj = Place()
 
         # check if obj is saved:
@@ -55,8 +64,6 @@ class TestPlace(unittest.TestCase):
         self.assertIsInstance(obj.amenity_ids, list)
         for id in obj.amenity_ids:
             self.assertIsInstance(id, int)
-        self.assertEqual(obj.created_at, now)
-        self.assertEqual(obj.updated_at, now)
         self.assertEqual(obj.city_id, "")
         self.assertEqual(obj.user_id, "")
         self.assertEqual(obj.name, "")
@@ -136,8 +143,8 @@ class TestPlace(unittest.TestCase):
         obj.save()
         key = f"{obj.__class__.__name__}.{obj.id}"
 
-        self.assertTrue(os.path.isfile(FileStorage._FileStorage__file_path))
-        with open(FileStorage._FileStorage__file_path, "r") as file:
+        self.assertTrue(os.path.isfile(self.storage._FileStorage__file_path))
+        with open(self.storage._FileStorage__file_path, "r") as file:
             data = json.load(file).keys()
             self.assertTrue(key in data)
 

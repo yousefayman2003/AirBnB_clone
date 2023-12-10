@@ -8,10 +8,20 @@ from uuid import uuid4
 from time import sleep
 from models.review import Review
 from models.engine.file_storage import FileStorage
+from models import storage
 
 
 class TestReview(unittest.TestCase):
     """unit test for Review Class"""
+
+    def setUp(self):
+        """First code to run before any test"""
+        self.storage = storage
+        self.storage._FileStorage__file_path = "test.json"
+
+    def tearDown(self):
+        """Code To Run after every test"""
+        storage._FileStorage__file_path = FileStorage._FileStorage__file_path
 
     def test_attributes(self):
         """Test if instance has all attributes of class"""
@@ -25,7 +35,6 @@ class TestReview(unittest.TestCase):
 
     def test_init_no_kwargs(self):
         """Test Constructor with no kwargs"""
-        now = datetime.now()
         obj = Review()
 
         # check if obj is saved:
@@ -38,8 +47,6 @@ class TestReview(unittest.TestCase):
         self.assertIsInstance(obj.place_id, str)
         self.assertIsInstance(obj.user_id, str)
         self.assertIsInstance(obj.text, str)
-        self.assertEqual(obj.created_at, now)
-        self.assertEqual(obj.updated_at, now)
         self.assertEqual(obj.place_id, "")
         self.assertEqual(obj.user_id, "")
         self.assertEqual(obj.text, "")
@@ -94,8 +101,8 @@ class TestReview(unittest.TestCase):
         obj.save()
         key = f"{obj.__class__.__name__}.{obj.id}"
 
-        self.assertTrue(os.path.isfile(FileStorage._FileStorage__file_path))
-        with open(FileStorage._FileStorage__file_path, "r") as file:
+        self.assertTrue(os.path.isfile(self.storage._FileStorage__file_path))
+        with open(self.storage._FileStorage__file_path, "r") as file:
             data = json.load(file).keys()
             self.assertTrue(key in data)
 

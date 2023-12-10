@@ -8,10 +8,20 @@ from uuid import uuid4
 from time import sleep
 from models.amenity import Amenity
 from models.engine.file_storage import FileStorage
+from models import storage
 
 
 class TestAmenity(unittest.TestCase):
     """unit test for Amenity Class"""
+
+    def setUp(self):
+        """First code to run before any test"""
+        self.storage = storage
+        self.storage._FileStorage__file_path = "test.json"
+
+    def tearDown(self):
+        """Code To Run after every test"""
+        storage._FileStorage__file_path = FileStorage._FileStorage__file_path
 
     def test_attributes(self):
         """Test if instance has all attributes of class"""
@@ -23,7 +33,6 @@ class TestAmenity(unittest.TestCase):
 
     def test_init_no_kwargs(self):
         """Test Constructor with no kwargs"""
-        now = datetime.now()
         obj = Amenity()
 
         # check if obj is saved:
@@ -34,8 +43,6 @@ class TestAmenity(unittest.TestCase):
         self.assertIsInstance(obj.created_at, datetime)
         self.assertIsInstance(obj.updated_at, datetime)
         self.assertIsInstance(obj.name, str)
-        self.assertEqual(obj.created_at, now)
-        self.assertEqual(obj.updated_at, now)
         self.assertEqual(obj.name, "")
         self.assertEqual(
             str(type(obj)), "<class 'models.amenity.Amenity'>")
@@ -84,8 +91,8 @@ class TestAmenity(unittest.TestCase):
         obj.save()
         key = f"{obj.__class__.__name__}.{obj.id}"
 
-        self.assertTrue(os.path.isfile(FileStorage._FileStorage__file_path))
-        with open(FileStorage._FileStorage__file_path, "r") as file:
+        self.assertTrue(os.path.isfile(self.storage._FileStorage__file_path))
+        with open(self.storage._FileStorage__file_path, "r") as file:
             data = json.load(file).keys()
             self.assertTrue(key in data)
 

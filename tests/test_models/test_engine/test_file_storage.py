@@ -11,12 +11,13 @@ class TestBaseModel(unittest.TestCase):
     def setUp(self):
         """First code to run before any test"""
         self.storage = FileStorage()
+        self.storage._FileStorage__file_path = "test.json"
 
     def test_all(self):
         """Test all method"""
         self.assertIsInstance(self.storage.all(), dict)
-        self.assertEqual(self.storage.all(),
-                         self.storage._FileStorage__objects)
+        objects = self.storage._FileStorage__objects
+        self.assertEqual(self.storage.all(), objects)
 
     def test_new(self):
         """Test new method"""
