@@ -15,7 +15,22 @@ class HBNBCommand(Cmd):
     Defines HBNB command interpreter.
 
     Public Class Attributes:
-        prompt (str): command prompt.
+        - prompt (str): command prompt.
+
+    Public Instance Methods:
+        - do_all(self, arg)
+        - do_count(self, arg)
+        - do_create(self, arg)
+        - do_destroy(self, arg)
+        - do_EOF(self, arg)
+        - do_quit(self, arg)
+        - do_show(self, arg)
+        - do_update(self, arg)
+
+        - emptyline(self)
+        - precmd(self, arg)
+
+        - is_valid(self, arg, operation)
     """
 
     # make a custom prompt
@@ -133,7 +148,8 @@ class HBNBCommand(Cmd):
                     cm_args = cm_args[:-1].split(", ")
                     for i, cm_arg in enumerate(cm_args):
                         key, value = cm_args[i].split(": ")
-                        query = f"{cls_name} {obj_id[1:-1]} {key[1:-1]} {value}"
+                        obj_id = obj[1:-1]
+                        query = f"{cls_name} {obj_id} {key[1:-1]} {value}"
                         if i == len(cm_args) - 1:
                             return "update " + query
                         self.do_update(query)
