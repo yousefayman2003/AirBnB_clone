@@ -65,5 +65,5 @@ class FileStorage:
                     cls_name = value["__class__"]
                     obj = self.classes[cls_name](**value)
                     self.new(obj)
-        except:
+        except Exception:
             pass
