@@ -33,7 +33,7 @@ class FileStorage:
 
     def all(self):
         """Returns the dictionary __objects."""
-        return self.__objects
+        return FileStorage.__objects
 
     def new(self, obj):
         """
@@ -43,13 +43,13 @@ class FileStorage:
             obj (object): object to store.
         """
         key = f"{obj.__class__.__name__}.{obj.id}"
-        self.__objects[key] = obj
+        FileStorage.__objects[key] = obj
 
     def save(self):
         """Serializes __objects to the JSON file."""
-        objects = {key: obj.to_dict() for key, obj in self.__objects.items()}
+        objects = {key: obj.to_dict() for key, obj in FileStorage.__objects.items()}
 
-        with open(self.__file_path, "w") as f:
+        with open(self.__file_path, "w", encoding="utf-8") as f:
             json.dump(objects, f, indent=4)
 
     def reload(self):
@@ -58,12 +58,12 @@ class FileStorage:
         file exists), otherwise do nothing.
         """
         try:
-            with open(self.__file_path, "r") as f:
+            with open(FileStorage.__file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
                 for value in data.values():
                     cls_name = value["__class__"]
-                    obj = self.classes[cls_name](**value)
+                    obj = FileStorage.classes[cls_name](**value)
                     self.new(obj)
         except Exception:
             pass
